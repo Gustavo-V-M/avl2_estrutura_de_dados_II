@@ -16,17 +16,38 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+// GRAMATICA
+// <data>         ::= ((<scope> | <key> | <comment>)* <blank_line>)*
+// <scope>        ::= <identifier> <blank_line>* "(" <blank_line>+ <data>* <blank> ")"
+// <key>          ::= <identifier> "=" <value>
+// <identifier>   ::= <string>
+// <value>        ::= <string>
+// <comment>      ::= "#" <string>
+
+// <string>       ::= <char>+
+// <char>         ::= <basic_latin> | <latin_1_supp> | <whitespace>
+// <basic_latin>  ::= [\u0020-\u007F]  ; Unicode Basic Latin
+// <latin_1_supp> ::= [\u00A0-\u00FF]  ; Unicode Latin-1 Supplement
+
+// <blank_line>   ::= <blank> <newline>
+// <blank>        ::= <whitespace>*
+// <whitespace>   ::= " " | "\t"
+// <newline>      ::= "\n" | "\r" | "\r\n"
+
 package parser;
 
 // Possíveis tokens reconhecidos pela classe Tokenizer.
 public enum TokenType {
-	
-	PRINT,
-	SUM,
+
 	STRING,
-	UINT,
-	WHITESPACE,
-	NEWLINE,
+	DATA,
+	SCOPE,
+	KEY,
+	IDENTIFIER,
+	VALUE, 
+	WHITESPACE, 
+	NEWLINE, 
 	EOF
+
 
 }

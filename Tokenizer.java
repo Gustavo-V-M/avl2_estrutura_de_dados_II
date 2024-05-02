@@ -21,24 +21,6 @@ package parser;
 import java.util.ArrayList;
 import java.util.List;
 
-//================================================================================
-// GRAMÁTICA
-// Observe que parte da gramática é processada/avaliada na classe Tokenizer e
-// parte é processada/avaliada na classe Parser (<code>, <print> e <sum>).
-//================================================================================
-// <code>         ::= ((<print> | <sum>)* <blank_line>)*
-// <print>        ::= ">" <whitespace>* <string>
-// <sum>          ::= "+" <whitespace>* <uint> (<whitespace>+ <uint>)*
-// <string>       ::= <char>+
-// <char>         ::= <basic_latin> | <latin_1_supp> | <whitespace>
-// <basic_latin>  ::= [\u0020-\u007F]  ; Unicode Basic Latin
-// <latin_1_supp> ::= [\u00A0-\u00FF]  ; Unicode Latin-1 Supplement
-// <uint>         ::= <digit>+
-// <digit>        ::= [0-9]
-// <blank_line>   ::= <whitespace>* <newline>
-// <whitespace>   ::= " " | "\t"
-// <newline>      ::= "\n" | "\r" | "\r\n"
-
 // <data>         ::= ((<scope> | <key> | <comment>)* <blank_line>)*
 // <scope>        ::= <identifier> <blank_line>* "(" <blank_line>+ <data>* <blank> ")"
 // <key>          ::= <identifier> "=" <value>
@@ -71,8 +53,6 @@ public class Tokenizer {
 		List<Token> tokens = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
 		int lineIndex = 0;
-		char currChar = '\0';
-		boolean isString = false;
 		
 		while (true) {
 			// Pode avançar para a próxima linha?
@@ -115,100 +95,8 @@ public class Tokenizer {
 					continue;
 				}				
 			}
-			
-			if (!isString) {
-				currChar = getNextChar();
-				
-				if (Character.isWhitespace(currChar)) { // Reconhece um token WHITESPACE.
-					// Considera uma sequência de espaços em branco como um único espaço em branco.
-					while (Character.isWhitespace(currChar)) {
-						currChar = getNextChar();
-					}
-					tokens.add(new Token(TokenType.WHITESPACE, " "));
-
-					// Se passamos por uma sequência de espaços em branco, voltamos uma posição do cursor
-					// somente se o último caractere não for um espaço em branco, para que a instrução
-					// currChar = getNextChar(); na próxima iteração do loop obtenha o caractere correto.
-					// Isso deve ser feito porque no loop de sequência de espaços em branco acima,
-					// sempre avançamos para o próximo caractere.
-					if (pos <= line.length() && !Character.isWhitespace(line.charAt(pos - 1))) {
-						--pos;
-					}
-				
-				} else if (Character.isDigit(currChar)) { // Reconhece um token UINT.
-					sb.setLength(0);
-					while (Character.isDigit(currChar)) {
-						sb.append(currChar);
-						currChar = getNextChar();
-					}
-					// Armazena o valor do UINT como string (será convertido para número pelo parser).
-					tokens.add(new Token(TokenType.UINT, sb.toString()));
-					sb.setLength(0);
-
-					// Se passamos por uma sequência de dígitos que compõem um número e não atingimos o
-					// final da linha, voltamos uma posição do cursor, para que a instrução
-					// currChar = getNextChar(); na próxima iteração do loop obtenha o caractere correto.
-					// Isso deve ser feito porque no loop de sequência de dígitos acima, sempre avançamos
-					// para o próximo caractere.
-					if (pos < line.length()) {
-						--pos;
-					}
-
-				} else if (currChar == '>') { // Reconhece um token PRINT.
-					// Se o token anterior é um PRINT, então começa uma string (permite que uma string
-					// comece com o caractere '>').
-					if (tokens.size() > 0 && tokens.get(tokens.size() - 1).getType() == TokenType.PRINT) {
-						isString = true;
-						startStringWith(sb, currChar);
-					} else {
-						tokens.add(new Token(TokenType.PRINT, ">"));
-					}
-					
-				} else if (currChar == '+') { // Reconhece um token SUM.
-					// Se o token anterior é um PRINT, então começa uma string (permite que uma string
-					// comece com o caractere '+').
-					if (tokens.size() > 0 && tokens.get(tokens.size() - 1).getType() == TokenType.PRINT) {
-						isString = true;
-						startStringWith(sb, currChar);
-					} else {
-						tokens.add(new Token(TokenType.SUM, "+"));
-					}
-				
-				} else if (currChar != '\0') { // Provavelmente encontramos uma string.
-					// Adiciona o caractere atual como primeiro da string e ativa flag isString para que,
-					// a partir da próxima iteração, os próximos caracteres sejam adicionados à string.
-					isString = true;
-					startStringWith(sb, currChar);
-				}
-
-			} else { // Reconhece um token STRING.
-				// Neste exemplo, a única condição para indicar que chegamos ao final de uma string é
-				// ler todo o conteúdo da linha atual até o final da linha.
-				while (pos < line.length()) {
-					currChar = getNextChar();
-					sb.append(currChar);
-				}
-				tokens.add(new Token(TokenType.STRING, sb.toString()));
-				sb.setLength(0);
-				isString = false;
-			}
 		}
-	
 		return tokens;
-	}
-	
-	// Avança para o próximo caractere da linha e retorna seu valor.
-	// Ou retorna o caractere nulo '\0' se chegou no final da linha.
-	private char getNextChar() {
-		if (pos >= line.length()) {
-			return '\0';
-		}
-		return line.charAt(pos++);
-	}
-	
-	private void startStringWith(StringBuilder sb, char ch) {
-		sb.setLength(0);
-		sb.append(ch);
 	}
 
 }

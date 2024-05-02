@@ -19,42 +19,40 @@
 package parser;
 
 import java.util.List;
+import java.util.regex.*;
 
-//================================================================================
-// GRAMÁTICA
-// Observe que parte da gramática é processada/avaliada na classe Tokenizer e
-// parte é processada/avaliada na classe Parser (<code>, <print> e <sum>).
-//================================================================================
-// <code>         ::= ((<print> | <sum>)* <blank_line>)*
-// <print>        ::= ">" <whitespace>* <string>
-// <sum>          ::= "+" <whitespace>* <uint> (<whitespace>+ <uint>)*
+// <data>         ::= ((<scope> | <key> | <comment>)* <blank_line>)*
+// <scope>        ::= <identifier> <blank_line>* "(" <blank_line>+ <data>* <blank> ")"
+// <key>          ::= <identifier> "=" <value>
+// <identifier>   ::= <string>
+// <value>        ::= <string>
+// <comment>      ::= "#" <string>
+
 // <string>       ::= <char>+
 // <char>         ::= <basic_latin> | <latin_1_supp> | <whitespace>
 // <basic_latin>  ::= [\u0020-\u007F]  ; Unicode Basic Latin
 // <latin_1_supp> ::= [\u00A0-\u00FF]  ; Unicode Latin-1 Supplement
-// <uint>         ::= <digit>+
-// <digit>        ::= [0-9]
-// <blank_line>   ::= <whitespace>* <newline>
+
+// <blank_line>   ::= <blank> <newline>
+// <blank>        ::= <whitespace>*
 // <whitespace>   ::= " " | "\t"
 // <newline>      ::= "\n" | "\r" | "\r\n"
 
+
 public class Parser {
 
+	private List<Token> initial_tokens;
 	private List<Token> tokens;
-	private Token currToken;
-	private int index;
+	private int curId;
 
 	public Parser() {
 		tokens = null;
-		currToken = null;
-		index = -1;
+		curId = 0;
 	}
 	
 	public void run(List<String> contents) {
 		Tokenizer tokenizer = new Tokenizer();
-		tokens = tokenizer.tokenize(contents);
-		currToken = null;
-		index = -1;
+		initial_tokens = tokenizer.tokenize(contents);
 
 		// Descomente o código abaixo para ver a lista de tokens gerada pelo Tokenizer.
 //		System.out.println("==================== TOKENS ====================");
@@ -65,130 +63,54 @@ public class Parser {
 		
 		parse();
 	}
-	
-	// O parser sempre começa avançando para o primeiro token da lista e, na sequência,
-	// avalia a regra <code> (a regra mais geral da gramática).
-	// Após processar <code>, o último token da lista deve ser o EOF, indicando que
-	// todo o conteúdo foi processado corretamente.
-	private void parse() {
-		advance();
-		code();		
-		if (currToken.getType() != TokenType.EOF) {
-			throw new RuntimeException("Parser.parse(): Esperado fim do conteúdo (EOF), mas encontrou " + currToken);
-		}
-	}
-	
-	// <code> ::= ((<print> | <sum>)* <blank_line>)*
-	private void code() {
-		TokenType type = currToken.getType();
 
-		// Consome 0+ regras do tipo <print> e/ou <sum> seguida por <blank_line>.
-		while (type == TokenType.PRINT || type == TokenType.SUM || type == TokenType.NEWLINE) {
-			if (type == TokenType.PRINT) {
-				print();
-			} else if (type == TokenType.SUM) {
-				sum();
+	private parse(){
+		for (Token currToken: initial_tokens){
+			// caso EOF
+			if (currToken.getType() == TokenType.EOF){
+				return;
 			}
-			
-			// Após processar <print> ou <sum>, consome um <blank_line>.
-			consume(TokenType.NEWLINE);
-			
-			// Neste exemplo, processamos a regra <blank_line> com uma quebra de linha na saída em tela.
-			System.out.println();			
-			
-			type = currToken.getType();
-		}
-	}
-	
-	// <print> ::= ">" <whitespace>* <string>
-	private void print() {
-		// Consome ">".
-		consume(TokenType.PRINT);
-		
-		// Consome 0+ espaços em branco (<whitespace>*).
-		while (currToken.getType() == TokenType.WHITESPACE) {
-			consume(TokenType.WHITESPACE);
-		}
-		
-		// Neste ponto, o esperado é ter um token STRING.
-		// Salvamos o valor do token para exibir em tela (caso o conteúdo esteja bem formado). 
-		String str = currToken.getValue();
-		
-		// Consome <string>.
-		consume(TokenType.STRING);
-		
-		// Se chegamos aqui, significa que o conteúdo seguiu a gramática e podemos processar a regra <print>
-		// (que significa exibir a string em tela).
-		System.out.print(str);
-	}
-	
-	// <sum> ::= "+" <whitespace>* <uint> (<whitespace>+ <uint>)*
-	private void sum() {
-		// Consome "+".
-		consume(TokenType.SUM);
-		
-		// Consome 0+ espaços em branco (<whitespace>*).
-		while (currToken.getType() == TokenType.WHITESPACE) {
-			consume(TokenType.WHITESPACE);
-		}
-		
-		// Neste ponto, o esperado é ter um token UINT.
-		// Salvamos o valor do token para realizar a somatória (caso o conteúdo esteja bem formado).
-		int sum = getIntFromToken();		
-		
-		// Consome <uint>.
-		consume(TokenType.UINT);
-
-		// Opcionalmente, podemos ter 0+ números separados por um espaço em branco ((<whitespace> <uint>)*),
-		// até chegar ao final da linha atual.
-		while (currToken.getType() != TokenType.NEWLINE) {
-			// Consome o <whitespace> obrigatório (<whitespace>+).
-			consume(TokenType.WHITESPACE);
-
-			// Consome espaços em branco extras, se tiver.
-			while (currToken.getType() == TokenType.WHITESPACE) {
-				consume(TokenType.WHITESPACE);
+			// caso NEWLINE
+			else if (currToken.getType() == TokenType.NEWLINE){
+				continue;
 			}
 
-			// Realizamos a somatória dos números.
-			sum += getIntFromToken();
-			
-			// Consome <uint>.
-			consume(TokenType.UINT);
-		}
-		
-		// Se chegamos aqui, significa que o conteúdo seguiu a gramática, temos a somatória dos números e podemos
-		// processar a regra <sum> (neste exemplo, exibimos o resultado da somatória em tela).
-		System.out.print(sum);
-	}
-	
-	private int getIntFromToken() {
-		try {
-			return Integer.parseInt(currToken.getValue());
-		} catch (Exception e) {
-			throw new RuntimeException("Parser.getIntFromToken(): Não foi possível converter o valor do token ('" + currToken.getValue() + "') em um número inteiro.");
+			// caso STRING
+			else {
+				String currString = currToken.getValue();
+
+				// sera usado REGEX para verificar o padrao da gramatica
+
+				// caso COMMENT
+				Pattern comment = Pattern.compile("^#.*");
+				Matcher commentMatcher = comment.matcher(currString);
+
+				// Caso KEY
+				Pattern key = Pattern.compile("[^\\s=]+=[^\\s=]+$");
+				Matcher keyMatcher = key.matcher(currString);
+				
+				// Caso SCOPE
+				Pattern scope = Pattern.compile("^[^\\s]+\\s*\\(\\n(?:.*\\n)*\\)$");
+				Matcher scopeMatcher = scope.matcher(currString); // FIXME concertar regex para o scope
+
+				// TODO fazer logica de criar a lista/arvore com os tokens
+				if (commentMatcher){
+					// Comentarios sao pulados
+					continue;
+				}
+				else if(keyMatcher){
+					// debug
+					System.out.println(currString);
+				}
+				else if (scopeMatcher) {
+					// debug
+					System.out.println(currString);
+				}
+
+			}
+
 		}
 	}
 
-	// Avança para o próximo token da lista (atualiza currToken).
-	private void advance() {
-		++index;
-		if (index >= tokens.size()) {
-			throw new RuntimeException("Fim de conteúdo inesperado.");
-		}
-		currToken = tokens.get(index);
-	}
-	
-	// Consome um token esperado.
-	// "Consumir um token" significa que o token atual é do tipo esperado por uma regra da gramática.
-	// Caso seja o token esperado, avança para o próximo token da lista (atualiza currToken).
-	// Caso contrário, lança uma exceção de token incorreto.
-	private void consume(TokenType expected) {
-		if (currToken.getType() == expected) {
-			advance();
-		} else {
-			throw new RuntimeException("Parser.consume(): Token incorreto. Esperado: " + expected + ". Obtido: " + currToken);
-		}
-	}
 
 }

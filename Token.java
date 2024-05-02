@@ -20,10 +20,18 @@ package parser;
 
 public class Token {
 	
+	private int id; 
 	private TokenType type;
 	private String value;
+
+	public Token(TokenType type, String value){
+		this.id = -1; // inicializado sem ID
+		this.type = type; 
+		this.value = value;
+	}
 	
-	public Token(TokenType type, String value) {
+	public Token(int id, TokenType type, String value) {
+		this.id = id;
 		this.type = type;
 		this.value = value;
 	}
@@ -35,10 +43,15 @@ public class Token {
 	public String getValue() {
 		return value;
 	}
+
+	public int getId() {
+		return id;
+	}
+
 	
 	@Override
 	public String toString() {
-		return type + ": " + value;
+		return id + " -> " + type + ": " + value;
 	}
 
 }
