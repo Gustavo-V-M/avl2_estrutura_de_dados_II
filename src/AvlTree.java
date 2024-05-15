@@ -1,3 +1,4 @@
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -64,7 +65,7 @@ public class AvlTree {
         }
     }
 
-    private Node addRecursive(Node root, String data, Node parent) { 
+    private Node addRecursive(Node root, String data, Node parent) {
 
         if (root == null) {
             root = new Node(data);
@@ -81,7 +82,7 @@ public class AvlTree {
         return root;
     }
 
-    public boolean add(String value) { 
+    public boolean add(String value) {
         if (searchNode(this.root, value) == null) {
             root = addRecursive(root, value, null);
             return true;
@@ -95,14 +96,14 @@ public class AvlTree {
         root = null;
     }
 
-    public Node removeNode(Node root, String value) { 
+    public Node removeNode(Node root, String value) {
         if (root == null) {
             return null;
         }
 
-        if (value.compareTo(root.getValue()) < 0) { 
+        if (value.compareTo(root.getValue()) < 0) {
             root.setLeft(removeNode(root.getLeft(), value));
-        } else if (value.compareTo(root.getValue()) > 0) { 
+        } else if (value.compareTo(root.getValue()) > 0) {
             root.setRight(removeNode(root.getRight(), value));
         } else {
             // Caso nó a ser removido seja encontrado
@@ -180,10 +181,10 @@ public class AvlTree {
         System.out.println("    Altura:" + node.getNodeHeight(node, 0));
     }
 
-    public Node searchNode(Node current, String value) { 
+    public Node searchNode(Node current, String value) {
         if (current == null)
             return null;
-        if (current.getValue().equals(value)) { 
+        if (current.getValue().equals(value)) {
             return current;
         }
         Node node = searchNode(current.getLeft(), value);
@@ -217,7 +218,7 @@ public class AvlTree {
         }
     }
 
-    private Node rotateLeft(Node root){
+    private Node rotateLeft(Node root) {
         Node aux = root.getRight();
         root.setRight(aux.getLeft());
         if (aux.getLeft() != null) {
@@ -235,11 +236,12 @@ public class AvlTree {
         root.setParent(aux);
         return aux;
     }
+
     public Node callRotateLeft(Node root) {
         return rotateLeft(root);
     }
 
-    private Node rotateRight(Node root){
+    private Node rotateRight(Node root) {
         Node aux = root.getLeft();
         root.setLeft(aux.getRight());
         if (aux.getRight() != null) {
@@ -257,6 +259,7 @@ public class AvlTree {
         root.setParent(aux);
         return aux;
     }
+
     public Node callRotateRight(Node root) {
         return rotateRight(root);
     }
@@ -265,14 +268,16 @@ public class AvlTree {
         root.setLeft(rotateLeft(root.getLeft()));
         return rotateRight(root);
     }
+
     public Node callRotateLeftRight(Node root) {
         return rotateLeftRight(root);
     }
 
-    private Node rotateRightLeft(Node root){
+    private Node rotateRightLeft(Node root) {
         root.setRight(rotateRight(root.getRight()));
         return rotateLeft(root);
     }
+
     public Node callRotateRightLeft(Node root) {
         return rotateRightLeft(root);
     }
@@ -287,20 +292,17 @@ public class AvlTree {
                 rotateRight(root);
                 System.out.println("Nó " + root.getValue() + " balanceado com rotação LL");
                 return true;
-            }
-            else {
+            } else {
                 rotateLeftRight(root);
                 System.out.println("Nó " + root.getValue() + " balanceado com rotação LR");
                 return true;
             }
-        }
-        else if (balanceFactor < -1) {
+        } else if (balanceFactor < -1) {
             if (root.getRight().getBalanceFactor(root.getRight()) <= 0) {
                 rotateLeft(root);
                 System.out.println("Nó " + root.getValue() + " balanceado com rotação RR");
                 return true;
-            }
-            else {
+            } else {
                 rotateRightLeft(root);
                 System.out.println("Nó " + root.getValue() + " balanceado com rotação RL");
                 return true;
@@ -308,8 +310,6 @@ public class AvlTree {
         }
         return false;
     }
-
-
 
 
     public Node findSuccessor(Node node) {
@@ -342,7 +342,7 @@ public class AvlTree {
         Node predecessor = null;
         Node current = root;
         while (current != node) {
-            if (node.getValue().compareTo(current.getValue()) < 0) { 
+            if (node.getValue().compareTo(current.getValue()) < 0) {
                 predecessor = current;
                 current = current.getRight();
             } else {
@@ -353,7 +353,7 @@ public class AvlTree {
     }
 
 
-    public boolean remove(String value) { 
+    public boolean remove(String value) {
         if (searchNode(this.root, value) != null) {
             removeNode(this.root, value);
             return true;
@@ -410,3 +410,4 @@ public class AvlTree {
         return min;
     }
 }
+
