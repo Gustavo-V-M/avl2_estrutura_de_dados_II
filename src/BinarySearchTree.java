@@ -65,7 +65,7 @@ public class BinarySearchTree {
         }
     }
 
-    private Node addRecursive(Node root, String data, Node parent) { // Adicionado parâmetro parent
+    private Node addRecursive(Node root, String data, Node parent) {
 
         if (root == null) {
             root = new Node(data);
@@ -74,9 +74,9 @@ public class BinarySearchTree {
         }
 
         if (data.compareTo(root.getValue()) < 0) {
-            root.setLeft(addRecursive(root.getLeft(), data, root)); // Passa root como parent do nó esquerdo
+            root.setLeft(addRecursive(root.getLeft(), data, root));
         } else if (data.compareTo(root.getValue()) > 0) {
-            root.setRight(addRecursive(root.getRight(), data, root)); // Passa root como parent do nó direito
+            root.setRight(addRecursive(root.getRight(), data, root));
         }
 
         return root;
