@@ -1,11 +1,11 @@
 public class Node {
-    private int data;
+    private String data;
     private Node parent;
     private Node right;
     private Node left;
     private int balanceFactor;
 
-    public Node(int data) {
+    public Node(String data) {
         this.data = data;
         right = null;
         left = null;
@@ -21,7 +21,7 @@ public class Node {
         this.left = left;
     }
 
-    public void setValue(int data) {
+    public void setValue(String data) {
         this.data = data;
     }
 
@@ -40,7 +40,7 @@ public class Node {
         return left;
     }
 
-    public int getValue() { // Alterado para retornar int
+    public String getValue() { // Alterado para retornar int
         return data;
     }
 
@@ -48,18 +48,18 @@ public class Node {
         return parent;
     }
 
-    public Node getNode(Node current, int data) { // Adicionado parâmetro data
+    public Node getNode(Node current, String data) {
         if (current == null) {
             return null;
         }
 
-        if (current.getValue() == data) { // Substituído compareTo() por ==
+        if (current.getValue().equals(data)) {
             return current;
         }
-        Node foundNode = getNode(current.getLeft(), data); // Passa data como argumento
+        Node foundNode = getNode(current.getLeft(), data);
 
         if (foundNode == null) {
-            foundNode = getNode(current.getRight(), data); // Passa data como argumento
+            foundNode = getNode(current.getRight(), data);
         }
 
         return foundNode;
@@ -121,7 +121,7 @@ public class Node {
         if (node == null) {
             return 0;
         }
-        if (node.getValue() == data) { // Substituído Objects.equals() por ==
+        if (node.getValue().equals(data)) {
             return level;
         }
         int downlevel = getLevel(node.left, level + 1);
