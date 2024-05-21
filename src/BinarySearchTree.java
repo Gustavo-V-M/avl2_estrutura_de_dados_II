@@ -65,26 +65,27 @@ public class BinarySearchTree {
         }
     }
 
-    private Node addRecursive(Node root, String data, Node parent) {
+    private Node addRecursive(Node root, int id, String data, TokenType type, Node parent) {
 
         if (root == null) {
-            root = new Node(data);
+            Token toAdd = new Token(type, data, id);
+            root = new Node(toAdd);
             root.setParent(parent);
             return root;
         }
 
-        if (data.compareTo(root.getValue()) < 0) {
-            root.setLeft(addRecursive(root.getLeft(), data, root));
-        } else if (data.compareTo(root.getValue()) > 0) {
-            root.setRight(addRecursive(root.getRight(), data, root));
+        if (id < root.getValue().getId()) {
+            root.setLeft(addRecursive(root.getLeft(), id, data, type, root));
+        } else if (id > root.getValue().getId()) {
+            root.setRight(addRecursive(root.getRight(), id, data, type, root));
         }
 
         return root;
     }
 
-    public boolean add(String value) {
-        if (searchNode(this.root, value) == null) {
-            root = addRecursive(root, value, null);
+    public boolean add(String value, TokenType type, int id) {
+        if (searchNode(this.root, id) == null) {
+            root = addRecursive(root, id, value, type, null);
             return true;
         } else {
             System.out.println("No " + value + " ja  existe na arvore");
@@ -96,15 +97,15 @@ public class BinarySearchTree {
         root = null;
     }
 
-    public Node removeNode(Node root, String value) {
+    public Node removeNode(Node root, int id) {
         if (root == null) {
             return null;
         }
 
-        if (value.compareTo(root.getValue()) < 0) {
-            root.setLeft(removeNode(root.getLeft(), value));
-        } else if (value.compareTo(root.getValue()) > 0) {
-            root.setRight(removeNode(root.getRight(), value));
+        if (id < root.getValue().getId()) {
+            root.setLeft(removeNode(root.getLeft(), id));
+        } else if (id > root.getValue().getId()) {
+            root.setRight(removeNode(root.getRight(), id));
         } else {
             // Caso nó a ser removido seja encontrado
             if (root.getLeft() == null && root.getRight() == null) {
@@ -126,7 +127,7 @@ public class BinarySearchTree {
                 Node successor = nodeMin(root.getRight());
                 root.setValue(successor.getValue());
                 // Remove o sucessor da sua posição original e atualiza as referências de pai conforme necessário
-                root.setRight(removeNode(root.getRight(), successor.getValue()));
+                root.setRight(removeNode(root.getRight(), successor.getValue().getId()));
             }
         }
         return root;
@@ -183,15 +184,15 @@ public class BinarySearchTree {
         System.out.println("    Altura:" + node.getNodeHeight(node, 0));
     }
 
-    public Node searchNode(Node current, String value) {
+    public Node searchNode(Node current, int id) {
         if (current == null)
             return null;
-        if (current.getValue().equals(value)) {
+        if (current.getValue().getId() == id) {
             return current;
         }
-        Node node = searchNode(current.getLeft(), value);
+        Node node = searchNode(current.getLeft(), id);
         if (node == null) {
-            node = searchNode(current.getRight(), value);
+            node = searchNode(current.getRight(), id);
         }
         return node;
     }
@@ -231,7 +232,7 @@ public class BinarySearchTree {
         Node successor = null;
         Node current = root;
         while (current != node) {
-            if (node.getValue().compareTo(current.getValue()) < 0) {
+            if (node.getValue().getId() > current.getValue().getId()) {
                 successor = current;
                 current = current.getLeft();
             } else {
@@ -251,7 +252,7 @@ public class BinarySearchTree {
         Node predecessor = null;
         Node current = root;
         while (current != node) {
-            if (node.getValue().compareTo(current.getValue()) < 0) {
+            if (node.getValue().getId() < current.getValue().getId()) {
                 predecessor = current;
                 current = current.getRight();
             } else {
@@ -261,12 +262,12 @@ public class BinarySearchTree {
         return predecessor;
     }
 
-    public boolean remove(String value) {
-        if (searchNode(this.root, value) != null) {
-            removeNode(this.root, value);
+    public boolean remove(int id) {
+        if (searchNode(this.root, id) != null) {
+            removeNode(this.root, id);
             return true;
         } else {
-            System.out.println("No " + value + " nao existe na arvore");
+            System.out.println("No " + id + " nao existe na arvore");
             return false;
         }
     }

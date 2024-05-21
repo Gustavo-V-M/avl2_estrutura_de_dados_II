@@ -64,26 +64,27 @@ public class AvlTree {
         }
     }
 
-    private Node addRecursive(Node root, String data, Node parent) {
+    private Node addRecursive(Node root, String data, TokenType type, Node parent) {
 
         if (root == null) {
-            root = new Node(data);
+            Token toAdd = new Token(type, data);
+            root = new Node(toAdd);
             root.setParent(parent);
             return root;
         }
 
-        if (data.compareTo(root.getValue()) < 0) {
-            root.setLeft(addRecursive(root.getLeft(), data, root)); // Passa root como parent do nó esquerdo
-        } else if (data.compareTo(root.getValue()) > 0) {
-            root.setRight(addRecursive(root.getRight(), data, root)); // Passa root como parent do nó direito
+        if (data.compareTo(root.getValue().getValue()) < 0) {
+            root.setLeft(addRecursive(root.getLeft(), data, type, root)); // Passa root como parent do nó esquerdo
+        } else if (data.compareTo(root.getValue().getValue()) > 0) {
+            root.setRight(addRecursive(root.getRight(), data, type, root)); // Passa root como parent do nó direito
         }
 
         return root;
     }
 
-    public boolean add(String value) {
+    public boolean add(String value, TokenType type) {
         if (searchNode(this.root, value) == null) {
-            root = addRecursive(root, value, null);
+            root = addRecursive(root, value, type ,null);
             return true;
         } else {
             System.out.println("No " + value + " ja  existe na arvore");
@@ -100,9 +101,9 @@ public class AvlTree {
             return null;
         }
 
-        if (value.compareTo(root.getValue()) < 0) {
+        if (value.compareTo(root.getValue().getValue()) < 0) {
             root.setLeft(removeNode(root.getLeft(), value));
-        } else if (value.compareTo(root.getValue()) > 0) {
+        } else if (value.compareTo(root.getValue().getValue()) > 0) {
             root.setRight(removeNode(root.getRight(), value));
         } else {
             // Caso nó a ser removido seja encontrado
@@ -125,7 +126,7 @@ public class AvlTree {
                 Node successor = nodeMin(root.getRight());
                 root.setValue(successor.getValue());
                 // Remove o sucessor da sua posição original e atualiza as referências de pai conforme necessário
-                root.setRight(removeNode(root.getRight(), successor.getValue()));
+                root.setRight(removeNode(root.getRight(), successor.getValue().getValue()));
             }
         }
         balance(root.getNode(root, value));
