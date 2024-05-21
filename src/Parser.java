@@ -5,47 +5,66 @@ public class Parser {
     private Token currentToken;
     private int index;
 
-    public Parser(){
-        tokens = null;
+     public Parser(List<Token> tokens){
+        this.tokens = tokens;
         currentToken = null;
         index = -1;
     }
-    //no do kishimoto tem uma função pra parse, que junta outras duas que são o advance e o code, mas n sei se precisa do advance
-    //da pra só fazer index++ e se passar do tamanho do token vc da como falso, eu acho q isso funciona
-    //tem a função code que meio que lê o codigo msm e vê oq é oq e printa dps
-    //tem q terminar o sum, mas eu dps faço isso
-    //e tem esse getInt... que da pra fazer tbm, basicamente é transformar o currentToken em int
-    //só usar o parseInt q faz isso
-    //e no do kishimoto tem RunTimeException em tudo tbm, da pra por isso
 
+    public void run(){
+        while(index < tokens.size()){
+            if(currentToken.getType() == TokenType.PRINT){
+                print();
+            }
+            else if(currentToken.getType() == TokenType.SUM){
+                sum();
+            }
+            advance();
+        }
+    }
 
-
-    //IMPORTANTE
-    //acho q em vez de print tem q mudar pra setNode ou algo assim
+    private void advance() {
+        index++;
+        if (index < tokens.size()) {
+            currentToken = tokens.get(index);
+        }
+    }
+    
     private void print(){
         if(currentToken.getType() == TokenType.PRINT){
             index++;
-            while(currentToken.getType() == TokenType.WHITESPACE && index <= tokens.size()){
+            while (index < tokens.size() && tokens.get(index).getType() == TokenType.WHITESPACE) {
                 index++;
             }
-            String str = currentToken.getValue();
-            index++;
-            System.out.print(str);
+            if (index < tokens.size()) {
+                String str = tokens.get(index).getValue(); 
+                index++; 
+                System.out.print(str); 
+            }
         }
     }
 
     private void sum(){
         if(currentToken.getType() == TokenType.SUM) {
             index++;
-            while (currentToken.getType() == TokenType.WHITESPACE && index <= tokens.size()) {
+            while (index < tokens.size() && tokens.get(index).getType() == TokenType.WHITESPACE) {
                 index++;
             }
-            int sum = getIntFromToken();
-            index++;
+            if (index < tokens.size()) {
+                int sum = getIntFromToken(); // Obtém o primeiro número a ser somado
+                index++;
+
+                while(index < tokens.size() && tokens.get(index).getType() == TokenType.WHITESPACE){
+                    index++;
+                    if(index < tokens.size() && tokens.get(index).getType() == TokenType.UINT){
+                        sum += getIntFromToken();
+                        index++;
+                    }
+                }
 
             System.out.print(sum);
+            }
         }
-        //falta coisa aqui se pa
     }
 
     private int getIntFromToken(){
